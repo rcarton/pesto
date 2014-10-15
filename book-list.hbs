@@ -1,0 +1,23 @@
+
+<table>
+    <thead>
+        <tr>
+            <th>Barcode</th>
+            <th>Title</th>
+            <th>Authors</th>
+            <th>On Hand</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {{#each books}}
+            <tr>
+                <td>{{barcode}}</td>
+                <td>{{title}}</td>
+                <td>{{authors}}</td>
+                <td>{{onHand}}</td>
+            </tr>
+        {{/each}}
+    </tbody>
+
+</table>

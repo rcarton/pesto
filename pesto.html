@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" type = "text/css" href="pesto.css" />
+
+        <script id="book-list-template" type="text/x-handlebars-template">
+            <ul>
+                <li>books in inventory: {{stats.numBooks}}</li>
+                <li>barcodes read: {{stats.numBarcodesRead}}</li>
+            </ul>
+
+            <table id="totals">
+                <thead>
+                    <th>Book count before</th>
+                    <th>Dollar amount before</th>
+                    <th>Book count after</th>
+                    <th>Dollar amount after</th>
+                    <th>Books removed</th>
+                    <th>Dollars removed</th>
+                    <th>% books removed</th>
+                    <th>% dollars removed</th>
+                </thead>
+
+                <tbody>
+                    <td>{{stats.numBooks}}</td>
+                    <td>${{stats.totalDollarBefore}}</td>
+                    <td>{{stats.foundNoExtra}}</td>
+                    <td>${{stats.totalDollarAfter}}</td>
+                    <td>{{stats.missing}}</td>
+                    <td>${{stats.totalDollarRemoved}}</td>
+                    <td>{{stats.percentBooksRemoved}}</td>
+                    <td>{{stats.percentBooksRemoved}}</td>
+                </tbody>
+            </table>
+
+            <ul>
+                Barcodes not matched:
+            {{#each extraBooks}}
+                <li>{{.}}</li>
+            {{else}}
+                None.
+            {{/each}}
+            </ul>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Barcode</th>
+                        <th>Price</th>
+                        <th>OH</th>
+                        <th>Authors</th>
+                        <th>Title</th>
+                        <th>Location</th>
+                        <th>Found</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{#each books}}
+                        <tr>
+                            <td>{{barcode}}</td>
+                            <td>{{price}}</td>
+                            <td>{{onHand}}</td>
+                            <td>{{authors}}</td>
+                            <td>{{title}}</td>
+                            <td>{{location}}</td>
+                            <td {{#if difference}}class="difference"{{/if}}>{{found}}/{{onHand}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </script>
+
+    </head>
+
+    <body>
+        <div class="content">
+            <h1>Pesto</h1>
+
+
+            <div class="basil-input">
+                <label for="basil-file">Basil export file:</label>
+                <input type="file" id="basil-file" name="basil-file" />
+            </div>
+
+            <div class="barcode-input" style="display: none">
+                <label for="barcode-file">Barcode export file:</label>
+                <input type="file" id="barcode-file" name="barcode-file" />
+            </div>
+
+            <div id="basil-render"></div>
+        </div>
+
+        <script src="jquery-2.1.1.min.js"></script>
+        <script src="lodash.min.js"></script>
+        <script src="csv.min.js"></script>
+        <script src="handlebars-v2.0.0.js"></script>
+        <script src="pesto.js"></script>
+
+        <script> </script>
+    </body>
+</html>

@@ -1,0 +1,29 @@
+
+html {
+    font-family: sans-serif;
+    color: #444;
+    font-size: 11px;
+}
+
+.content {
+    max-width: 90%;
+    margin: auto;
+}
+
+table {
+    border: 1px solid #ccc;
+}
+
+#totals {
+    margin: auto;
+    width: 100%;
+    margin-bottom: 2em;
+}
+
+tr:nth-child(even) {
+    background: #eee;
+}
+
+.difference {
+    background: red;
+}
