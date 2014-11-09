@@ -5,17 +5,23 @@
  *
  */
 
-function BasilData(data) {
+function BasilData() {
     // remove the first row
     var self = this;
-    self.data = _.rest(data);
+
     self.books = {};
     self.extraBooks = [];
+    self.basilFiles = {};
+    self.barcodeFiles = {};
+    self.barcodes = [];
 
-    var keys = ["id", 
+    self.keys = ["id", 
                 "barcode",
                 "title",
                 "authors",
+                "publisher",
+                "pubDate",
+                "binding",
                 "condition",
                 "section",
                 "location",
@@ -27,10 +33,19 @@ function BasilData(data) {
                 "firstIn",
                 "lastIn",
                 "lastSold",
+                "metaTags",
+                "keywords",
                 "user"];
 
+
+}
+
+BasilData.prototype.loadBasilFile = function(filename, data) {
+    var self = this;
+    var data = _.rest(data);
+
     var makeBook = function(bookRow) {
-        var book = _.zipObject(keys, bookRow);
+        var book = _.zipObject(self.keys, bookRow);
         book.found = 0;
         book.onHand = parseInt(book.onHand);
         book.foundNoExtra = 0;
@@ -38,14 +53,19 @@ function BasilData(data) {
             self.books[book.barcode] = book;
         }
         book.price = parseFloat(book.price.substr(1));
+        // Book lastIn was within 7 days
+        book.isRecent = Math.abs(new Date() - new Date(book.lastIn)) < 604800000;
     };
 
-    _.forEach(this.data, makeBook);
-}
+    self.basilFiles[filename] = data;
+    _.forEach(data, makeBook);
+    self.computeStats();
+};
 
-BasilData.prototype.loadBarcodes = function(barcodes) {
+BasilData.prototype.loadBarcodes = function(filename, barcodes) {
     var self = this;
-    self.barcodes = barcodes;
+    self.barcodes = self.barcodes.concat(barcodes);
+    self.barcodeFiles[filename] = barcodes;
     _.forEach(barcodes, function(codeRow) {
         var barcode = codeRow[0].toString();
         var book = self.books[barcode];
@@ -53,13 +73,13 @@ BasilData.prototype.loadBarcodes = function(barcodes) {
         // Compare the last 10 digits if not found
         if (!book) {
             var barcodeShort = barcode.substr(3, 9);
-            console.log('Trying ' + barcodeShort);
+            //console.log('Trying ' + barcodeShort);
             key = _.find(_.keys(self.books), function(bookCode) {
                 return  barcodeShort == bookCode.substr(0, 9);
             });
 
             if (key) {
-                console.log('Found :' + barcode + ' == ' + key);
+                //console.log('Found :' + barcode + ' == ' + key);
                 book = self.books[key];
             }
         }
@@ -94,46 +114,79 @@ BasilData.prototype.render = function() {
     var context = {
         'books': books,
         'extraBooks': self.extraBooks,
-        'stats': self.stats
+        'stats': self.stats,
+        'statsBySection': self.statsBySection,
+        'barcodeFiles': _.keys(self.barcodeFiles),
+        'basilFiles': _.keys(self.basilFiles)
     };
     var html = template(context);
     $('#basil-render').html(html);
+    $('#basil-render .collapsed').click(function() { $(this).removeClass('collapsed'); });
 };
 BasilData.prototype.computeStats = function() {
     console.log('Computing stats..');
     var self = this;
     var stats = {};
-    stats.numBooks = 0;
-    stats.numBarcodesRead = self.barcodes.length;
-    stats.missing = 0;
-    stats.found = 0;
-    stats.extra = 0;
-    stats.totalDollarBefore = 0;
-    stats.totalDollarAfter = 0;
+    var statsBySection = {};
 
-    _.forEach(self.books, function(book) {
-        stats.numBooks += book.onHand;
-        stats.found += book.found;
-        if (book.found > book.onHand) stats.extra += book.found - book.onHand;
-        if (book.found < book.onHand) stats.missing += book.onHand - book.found;
-        stats.totalDollarBefore += book.onHand * book.price;
-        stats.totalDollarAfter += book.foundNoExtra * book.price;
+    var initStats = function(statsObj) {
+        statsObj.numBooks = 0;
+        statsObj.numBarcodesRead = self.barcodes.length;
+        statsObj.missing = 0;
+        statsObj.found = 0;
+        statsObj.extra = 0;
+        statsObj.totalDollarBefore = 0;
+        statsObj.totalDollarAfter = 0;
+    };
+
+    var updateStatsForBook = function(statsObj, book) {
+        statsObj.numBooks += book.onHand;
+        statsObj.found += book.found;
+        if (book.found > book.onHand) statsObj.extra += book.found - book.onHand;
+        if (book.found < book.onHand) statsObj.missing += book.onHand - book.found;
+        statsObj.totalDollarBefore += book.onHand * book.price;
+        statsObj.totalDollarAfter += book.foundNoExtra * book.price;
+    };
+
+    var finalizeStats = function(statsObj) {
+        statsObj.foundNoExtra = statsObj.found - statsObj.extra;
+        statsObj.totalDollarRemoved = statsObj.totalDollarBefore - statsObj.totalDollarAfter;
+        
+        statsObj.percentDollarRemoved = (statsObj.totalDollarBefore - statsObj.totalDollarAfter) / statsObj.totalDollarBefore * 100;
+        statsObj.percentDollarRemoved = statsObj.percentDollarRemoved.toFixed(2);
+
+        statsObj.percentBooksRemoved = (statsObj.numBooks - statsObj.foundNoExtra) / statsObj.numBooks * 100;
+        statsObj.percentBooksRemoved = statsObj.percentBooksRemoved.toFixed(2);
+
+        statsObj.totalDollarBefore = statsObj.totalDollarBefore.toFixed(2);
+        statsObj.totalDollarAfter = statsObj.totalDollarAfter.toFixed(2);
+        statsObj.totalDollarRemoved = statsObj.totalDollarRemoved.toFixed(2);
+    };
+
+    // Initialize the global stats
+    initStats(stats);
+
+    // Find the different sections
+    var sections = _.keys(_.groupBy(self.books, 'section'));
+    _.forEach(sections, function(section) {
+        statsBySection[section] = {};
+        initStats(statsBySection[section]);
     });
 
-    stats.foundNoExtra = stats.found - stats.extra;
-    stats.totalDollarRemoved = stats.totalDollarBefore - stats.totalDollarAfter;
-    
-    stats.percentDollarRemoved = stats.totalDollarAfter / stats.totalDollarBefore * 100;
-    stats.percentDollarRemoved = stats.percentDollarRemoved.toFixed(2);
+    // Compute the stats book by book
+    _.forEach(self.books, function(book) {
+        updateStatsForBook(stats, book);
+        updateStatsForBook(statsBySection[book.section], book);
+    });
 
-    stats.percentBooksRemoved = (stats.foundNoExtra / stats.numBooks * 100);
-    stats.percentBooksRemoved = stats.percentBooksRemoved.toFixed(2);
+    // Finalize the global stats
+    finalizeStats(stats);
 
-    stats.totalDollarBefore = stats.totalDollarBefore.toFixed(2);
-    stats.totalDollarAfter = stats.totalDollarAfter.toFixed(2);
-    stats.totalDollarRemoved = stats.totalDollarRemoved.toFixed(2);
+    // Finalize the stats per section
+    _.forOwn(statsBySection, finalizeStats);
 
     self.stats = stats;
+    self.statsBySection = statsBySection;
 };
 
 
@@ -149,11 +202,13 @@ function basilHandler(e) {
     var csv = new CSV(data, options);
     var parsed = csv.parse();
 
-    console.log('Creating inventory..')
-    window.basilData = new BasilData(parsed);
+    console.log('Creating inventory..');
+    var filename = $($('#basil-file').val().split(/[\\/]/)).last()[0];
+    basilData.loadBasilFile(filename, parsed);
 
-    //console.log(basilData);
+    $('#basil-file').val('');
     $('.barcode-input').show();
+    basilData.render();
 } 
 
 function barcodeHandler(e) {
@@ -165,9 +220,11 @@ function barcodeHandler(e) {
     var csv = new CSV(data);
     var parsed = csv.parse();
 
-    //console.log(parsed);
+    // Hacky.
+    var filename = $($('#barcode-file').val().split(/[\\/]/)).last()[0];
+    $('#barcode-file').val('');
 
-    basilData.loadBarcodes(parsed);
+    basilData.loadBarcodes(filename, parsed);
     basilData.render();
 } 
 
@@ -189,3 +246,4 @@ document.getElementById('basil-file').addEventListener('change', handleFileSelec
 document.getElementById('barcode-file').addEventListener('change', handleFileSelectCurry(barcodeHandler), false);
 
 
+window.basilData = new BasilData();

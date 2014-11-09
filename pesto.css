@@ -14,7 +14,7 @@ table {
     border: 1px solid #ccc;
 }
 
-#totals {
+.totals {
     margin: auto;
     width: 100%;
     margin-bottom: 2em;
@@ -26,4 +26,16 @@ tr:nth-child(even) {
 
 .difference {
     background: red;
+}
+
+.collapsed li {
+    display: none;
+}
+
+.collapsed:hover {
+    cursor: pointer;
+}
+
+.isRecent {
+    background-color: #A9FFA9;
 }
