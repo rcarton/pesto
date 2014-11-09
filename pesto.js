@@ -140,6 +140,11 @@ BasilData.prototype.computeStats = function() {
     };
 
     var updateStatsForBook = function(statsObj, book) {
+        // For recent books, we assume found == onHand to account for books not shelved yet
+        if (book.isRecent) {
+            book.found = book.onHand;
+        }
+
         statsObj.numBooks += book.onHand;
         statsObj.found += book.found;
         if (book.found > book.onHand) statsObj.extra += book.found - book.onHand;
@@ -241,6 +246,10 @@ var handleFileSelectCurry = function(handler) {
         handleFileSelect(e, handler);
     };
 };
+
+function toggleDifference() {
+    $('#book-list tbody tr:not(.difference)').toggleClass('no-difference-hidden');
+}
 
 document.getElementById('basil-file').addEventListener('change', handleFileSelectCurry(basilHandler), false);
 document.getElementById('barcode-file').addEventListener('change', handleFileSelectCurry(barcodeHandler), false);

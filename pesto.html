@@ -48,7 +48,7 @@
                     <td>{{stats.missing}}</td>
                     <td>${{stats.totalDollarRemoved}}</td>
                     <td>{{stats.percentBooksRemoved}}</td>
-                    <td>{{stats.percentBooksRemoved}}</td>
+                    <td>{{stats.percentDollarRemoved}}</td>
                 </tbody>
             </table>
 
@@ -74,7 +74,7 @@
                         <td>{{this.missing}}</td>
                         <td>${{this.totalDollarRemoved}}</td>
                         <td>{{this.percentBooksRemoved}}</td>
-                        <td>{{this.percentBooksRemoved}}</td>
+                        <td>{{this.percentDollarRemoved}}</td>
                     </tbody>
                 </table>
             {{/each}}
@@ -89,7 +89,11 @@
             {{/each}}
             </ul>
 
-            <table>
+            <div class="menu">
+                <button id="only-difference" onclick="javascript:toggleDifference();">Show only missing/extra</button>
+            </div>
+                
+            <table id="book-list">
                 <thead>
                     <tr>
                         <th>Barcode</th>
@@ -107,7 +111,7 @@
 
                 <tbody>
                     {{#each books}}
-                        <tr>
+                        <tr {{#if difference}}class="difference"{{/if}}>
                             <td>{{barcode}}</td>
                             <td>{{id}}</td>
                             <td>{{price}}</td>

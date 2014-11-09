@@ -24,7 +24,7 @@ tr:nth-child(even) {
     background: #eee;
 }
 
-.difference {
+td.difference {
     background: red;
 }
 
@@ -38,4 +38,12 @@ tr:nth-child(even) {
 
 .isRecent {
     background-color: #A9FFA9;
+}
+
+.no-difference-hidden {
+    display: none;
+}
+
+.menu {
+    margin: 1em;
 }
