@@ -25,6 +25,7 @@ function BasilData() {
                 "condition",
                 "section",
                 "location",
+                "itemTypeId",
                 "onHand",
                 "price",
                 "cost",
@@ -150,7 +151,7 @@ BasilData.prototype.computeStats = function() {
         if (book.found > book.onHand) statsObj.extra += book.found - book.onHand;
         if (book.found < book.onHand) statsObj.missing += book.onHand - book.found;
         statsObj.totalDollarBefore += book.onHand * book.price;
-        statsObj.totalDollarAfter += book.foundNoExtra * book.price;
+        statsObj.totalDollarAfter += book.found * book.price;
     };
 
     var finalizeStats = function(statsObj) {
@@ -160,7 +161,7 @@ BasilData.prototype.computeStats = function() {
         statsObj.percentDollarRemoved = (statsObj.totalDollarBefore - statsObj.totalDollarAfter) / statsObj.totalDollarBefore * 100;
         statsObj.percentDollarRemoved = statsObj.percentDollarRemoved.toFixed(2);
 
-        statsObj.percentBooksRemoved = (statsObj.numBooks - statsObj.foundNoExtra) / statsObj.numBooks * 100;
+        statsObj.percentBooksRemoved = (statsObj.numBooks - statsObj.found) / statsObj.numBooks * 100;
         statsObj.percentBooksRemoved = statsObj.percentBooksRemoved.toFixed(2);
 
         statsObj.totalDollarBefore = statsObj.totalDollarBefore.toFixed(2);

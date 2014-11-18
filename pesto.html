@@ -43,7 +43,7 @@
                 <tbody>
                     <td>{{stats.numBooks}}</td>
                     <td>${{stats.totalDollarBefore}}</td>
-                    <td>{{stats.foundNoExtra}}</td>
+                    <td>{{stats.found}}</td>
                     <td>${{stats.totalDollarAfter}}</td>
                     <td>{{stats.missing}}</td>
                     <td>${{stats.totalDollarRemoved}}</td>
@@ -69,7 +69,7 @@
                     <tbody>
                         <td>{{this.numBooks}}</td>
                         <td>${{this.totalDollarBefore}}</td>
-                        <td>{{this.foundNoExtra}}</td>
+                        <td>{{this.found}}</td>
                         <td>${{this.totalDollarAfter}}</td>
                         <td>{{this.missing}}</td>
                         <td>${{this.totalDollarRemoved}}</td>
@@ -104,6 +104,7 @@
                         <th>Title</th>
                         <th>Binding</th>
                         <th>Location</th>
+                        <th>Item type id</th>
                         <th style="min-width: 60px;">Last in</th>
                         <th>Found</th>
                     </tr>
@@ -120,6 +121,7 @@
                             <td>{{title}}</td>
                             <td>{{binding}}</td>
                             <td>{{location}}</td>
+                            <td>{{itemTypeId}}</td>
                             <td {{#if isRecent}}class="isRecent"{{/if}}>{{lastIn}}</td>
                             <td {{#if difference}}class="difference"{{/if}}>{{found}}/{{onHand}}</td>
                         </tr>
