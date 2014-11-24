@@ -141,8 +141,8 @@ BasilData.prototype.computeStats = function() {
     };
 
     var updateStatsForBook = function(statsObj, book) {
-        // For recent books, we assume found == onHand to account for books not shelved yet
-        if (book.isRecent) {
+        // For recent books, don't count missing ones because they might not have been shelved yet
+        if (self.barcodeFiles.length == 0 && book.isRecent && book.found < book.onHand) {
             book.found = book.onHand;
         }
 
