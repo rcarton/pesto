@@ -54,8 +54,12 @@ BasilData.prototype.loadBasilFile = function(filename, data) {
             self.books[book.barcode] = book;
         }
         book.price = parseFloat(book.price.substr(1));
+
         // Book lastIn was within 7 days
         book.isRecent = Math.abs(new Date() - new Date(book.lastIn)) < 604800000;
+
+        // Used for adjustments, for example recent books are adjusted to not show as losses
+        book.adjusted = false;
     };
 
     self.basilFiles[filename] = data;
@@ -86,6 +90,10 @@ BasilData.prototype.loadBarcodes = function(filename, barcodes) {
         }
 
         if (book) {
+            if (book.adjusted) {
+                book.adjusted = false;
+                book.found = 0;
+            }
             book.found += 1;
         } else {
             // Add to extraBooks
@@ -142,8 +150,9 @@ BasilData.prototype.computeStats = function() {
 
     var updateStatsForBook = function(statsObj, book) {
         // For recent books, don't count missing ones because they might not have been shelved yet
-        if (self.barcodeFiles.length == 0 && book.isRecent && book.found < book.onHand) {
+        if (self.barcodes.length > 0 && book.isRecent && book.found < book.onHand) {
             book.found = book.onHand;
+            book.adjusted = true;
         }
 
         statsObj.numBooks += book.onHand;

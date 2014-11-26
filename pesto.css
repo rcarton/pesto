@@ -28,6 +28,10 @@ td.difference {
     background: red;
 }
 
+td.adjusted {
+    background: rgb(173, 199, 245);
+}
+
 .collapsed li {
     display: none;
 }

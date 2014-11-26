@@ -123,7 +123,7 @@
                             <td>{{location}}</td>
                             <td>{{itemTypeId}}</td>
                             <td {{#if isRecent}}class="isRecent"{{/if}}>{{lastIn}}</td>
-                            <td {{#if difference}}class="difference"{{/if}}>{{found}}/{{onHand}}</td>
+                            <td {{#if difference}}class="{{#if adjusted}}adjusted{{else}}difference{{/if}}"{{/if}}>{{found}}/{{onHand}}</td>
                         </tr>
                     {{/each}}
                 </tbody>
